@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Оптимальное расписание для 7-классника с ориентацией на поступление в MIT">
+  <title>Оптимальное расписание для 7-классника с ориентацией на MIT</title>
+  <style>
+    :root {
+      --primary-color: #4a89dc;
+      --secondary-color: #3bafda;
+      --text-color: #333;
+      --bg-color: #f9fbfc;
+      --table-header: #004a99;
+      --table-row-even: #f0f7ff;
+      --table-row-hover: #e1f0ff;
+      --note-bg: #e6f2ff;
+      --weekend-bg: #f0fff0;
+      --border-color: #cbd5e1;
+      --shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    [data-theme="dark"] {
+      --primary-color: #5d9cec;
+      --secondary-color: #48cfad;
+      --text-color: #f0f0f0;
+      --bg-color: #1a1a1a;
+      --table-header: #003366;
+      --table-row-even: #2d2d2d;
+      --table-row-hover: #3d3d3d;
+      --note-bg: #2a3a4a;
+      --weekend-bg: #1e3a1e;
+      --border-color: #444;
+      --shadow: 0 0 15px rgba(0,0,0,0.3);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 30px auto;
+      background: var(--bg-color);
+      padding: 30px;
+      color: var(--text-color);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      line-height: 1.6;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    h1, h2 {
+      color: var(--primary-color);
+      margin-top: 25px;
+    }
+
+    h1 {
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 25px 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 14px 16px;
+      text-align: center;
+    }
+
+    th {
+      background-color: var(--table-header);
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--table-row-even);
+    }
+
+    tr:hover {
+      background-color: var(--table-row-hover);
+    }
+
+    ul {
+      margin-top: 15px;
+      padding-left: 30px;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+
+    .note {
+      background: var(--note-bg);
+      border-left: 5px solid var(--primary-color);
+      padding: 25px;
+      margin: 30px 0;
+      border-radius: 8px;
+    }
+
+    .highlight {
+      background-color: rgba(255, 250, 205, 0.3);
+      padding: 3px 5px;
+      border-radius: 3px;
+    }
+
+    .weekend-plan {
+      background-color: var(--weekend-bg);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 25px 0;
+      border-left: 5px solid #2e8b57;
+    }
+
+    .time-col {
+      font-weight: bold;
+      background-color: var(--table-row-even);
+    }
+
+    .stem-subject {
+      font-weight: bold;
+      color: var(--secondary-color);
+    }
+
+    .arts-subject {
+      font-weight: bold;
+      color: #b381d1;
+    }
+
+    .humanities-subject {
+      font-weight: bold;
+      color: #5cb85c;
+    }
+
+    .break {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: #888;
+      font-style: italic;
+    }
+
+    .lunch {
+      background-color: rgba(255, 215, 0, 0.1);
+      font-weight: bold;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 0.9em;
+      color: var(--text-color);
+      text-align: center;
+      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
+      opacity: 0.8;
+    }
+
+    .site-link {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 10px 18px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+
+    .site-link:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 25px;
+      left: 25px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+
+    .theme-toggle:hover {
+      background: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 20px;
+      }
+      .site-link, .theme-toggle {
+        position: static;
+        display: inline-block;
+        margin: 0 5px 15px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">Тёмная тема</button>
+  <a href="https://ugalek142.github.io/mitshedule" class="site-link" target="_blank">MIT Schedule</a>
+
+  <h1>Оптимальное расписание для 7-классника</h1>
+  <p><strong>Цель:</strong> Эффективно сочетать школьную программу с углубленным изучением STEM-дисциплин для подготовки к поступлению в MIT или другие топовые технические университеты.</p>
+  
+  <h2>Основное учебное расписание (Понедельник — Пятница)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 15%">Время</th>
+        <th>Понедельник</th>
+        <th>Вторник</th>
+        <th>Среда</th>
+        <th>Четверг</th>
+        <th>Пятница</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="time-col">8:30 — 9:15</td>
+        <td class="stem-subject">Математика</td>
+        <td class="humanities-subject">Русский язык</td>
+        <td class="stem-subject">Математика</td>
+        <td class="humanities-subject">Обществознание</td>
+        <td class="stem-subject">Математика</td>
+      </tr>
+      <tr>
+        <td class="time-col">9:20 — 10:05</td>
+        <td class="humanities-subject">Русский язык</td>
+        <td class="stem-subject">Физика</td>
+        <td class="humanities-subject">История</td>
+        <td class="stem-subject">Химия</td>
+        <td class="humanities-subject">Литература</td>
+      </tr>
+      
+      <tr class="break">
+        <td class="time-col">10:05 — 10:20</td>
+        <td colspan="5">Перемена (15 мин)</td>
+      </tr>
+      
+      <tr>
+        <td class="time-col">10:20 — 11:05</td>
+        <td class="stem-subject">Английский язык</td>
+        <td class="stem-subject">Математика</td>
+        <td class="stem-subject">Английский язык</td>
+        <td class="stem-subject">Физика</td>
+        <td class="stem-subject">Информатика</td>
+      </tr>
+      <tr>
+        <td class="time-col">11:10 — 11:55</td>
+        <td class="humanities-subject">Обществознание</td>
+        <td class="humanities-subject">Литература</td>
+        <td class="stem-subject">Программирование</td>
+        <td class="humanities-subject">География</td>
+        <td class="stem-subject">Английский язык</td>
+      </tr>
+      
+      <tr class="lunch">
+        <td class="time-col">11:55 — 12:30</td>
+        <td colspan="5">Обед (35 мин)</td>
+      </tr>
+      
+      <tr>
+        <td class="time-col">12:30 — 13:15</td>
+        <td>Физкультура</td>
+        <td class="arts-subject">Музыка</td>
+        <td class="stem-subject">Биология</td>
+        <td class="arts-subject">ИЗО</td>
+        <td>Физкультура</td>
+      </tr>
+      <tr>
+        <td class="time-col">13:20 — 14:05</td>
+        <td class="humanities-subject">Литература</td>
+        <td class="stem-subject">Технология</td>
+        <td class="arts-subject">ИЗО</td>
+        <td class="stem-subject">Биология</td>
+        <td class="arts-subject">Музыка</td>
+      </tr>
+      
+      <tr class="break">
+        <td class="time-col">14:05 — 14:20</td>
+        <td colspan="5">Перемена (15 мин)</td>
+      </tr>
+      
+      <tr>
+        <td class="time-col">14:20 — 15:30</td>
+        <td colspan="5" style="text-align:left;">
+          <strong>Дополнительные занятия после школы:</strong>
+          <ul>
+            <li><span class="stem-subject">Кружок робототехники/программирования</span> (Python, C++, Scratch)</li>
+            <li><span class="stem-subject">Подготовка к олимпиадам</span> по математике, физике, информатике</li>
+            <li><span class="stem-subject">Углубленный английский</span> (разговорный + технический, подготовка к TOEFL)</li>
+            <li><span class="stem-subject">Научные проекты</span> (работа с Arduino, простые исследования)</li>
+            <li>Чтение научно-популярной литературы (30 мин ежедневно)</li>
+          </ul>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="weekend-plan">
+    <h2>Выходные дни (Суббота и Воскресенье)</h2>
+    <ul>
+      <li><strong>Суббота утро (9:00-12:00):</strong> Углубленное изучение математики (олимпиадные задачи, дополнительные темы)</li>
+      <li><strong>Суббота день (13:00-15:00):</strong> Работа над долгосрочным проектом (программирование, исследования)</li>
+      <li><strong>Воскресенье утро (9:00-11:00):</strong> Физика/химия (эксперименты, решение задач)</li>
+      <li><strong>Воскресенье день (12:00-15:00):</strong> Отдых, творческие занятия (музыка, рисование), спорт</li>
+      <li><strong>Каждый вечер (20:00-21:00):</strong> Чтение на английском, ведение дневника достижений</li>
+    </ul>
+  </div>
+  
+  <div class="note">
+    <h2>Стратегические рекомендации для поступления в MIT</h2>
+    <ul>
+      <li><strong>Баланс STEM и гуманитарных наук:</strong> MIT ценит разносторонне развитых студентов. Не пренебрегайте музыкой и искусством - они развивают креативное мышление.</li>
+      
+      <li><strong>Режим дня:</strong> Соблюдайте перерывы между занятиями (15-20 мин каждый час) для лучшего усвоения материала.</li>
+      
+      <li><strong>Питание:</strong> Полноценный обед и перекусы (орехи, фрукты) помогут поддерживать энергию для учёбы.</li>
+      
+      <li><strong>Творческие предметы:</strong> Используйте музыку и ИЗО как способ развития правого полушария и снятия стресса.</li>
+      
+      <li><strong>Физическая активность:</strong> Ежедневные занятия спортом улучшают когнитивные функции и концентрацию.</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <h2>Оптимальный распорядок дня</h2>
+    <ul>
+      <li><strong>7:30 — Подъём</strong></li>
+      <li><strong>7:30-8:00 — Зарядка, утренние процедуры</strong></li>
+      <li><strong>8:00-8:30 — Завтрак</strong></li>
+      <li><strong>8:30-14:05 — Учебные занятия (с переменами и обедом)</strong></li>
+      <li><strong>14:20-15:30 — Дополнительные STEM-занятия</strong></li>
+      <li><strong>15:30-16:30 — Отдых, прогулка</strong></li>
+      <li><strong>16:30-18:30 — Выполнение домашних заданий</strong></li>
+      <li><strong>18:30-19:30 — Ужин и свободное время</strong></li>
+      <li><strong>19:30-20:30 — Чтение, проектная работа</strong></li>
+      <li><strong>20:30-21:30 — Подготовка к следующему дню</strong></li>
+      <li><strong>21:30-22:00 — Вечерний ритуал, отход ко сну</strong></li>
+    </ul>
+  </div>
+
+  <footer>
+    <p>Примечание: Это интенсивная программа. Адаптируйте ее под свои возможности, сохраняя разумный баланс между учебой и отдыхом.</p>
+    <p>© 2023 Подготовка к MIT. Рекомендуется регулярно пересматривать и корректировать план.</p>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const themeToggle = document.querySelector('.theme-toggle');
+      
+      if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        themeToggle.textContent = 'Тёмная тема';
+        localStorage.setItem('theme', 'light');
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = 'Светлая тема';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    // Проверяем сохранённую тему при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.querySelector('.theme-toggle').textContent = 'Светлая тема';
+      }
+    });
+  </script>
+</body>
+</html>
